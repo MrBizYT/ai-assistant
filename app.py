@@ -99,11 +99,67 @@ def home():
         <div class="container">
             <h1>🤖 Free AI Assistant</h1>
             
-            <div class="status">
-                <h2>✅ Сервер работает!</h2>
-                <p>Время: {{ time }}</p>
-                <p>Статус: <span style="color: #90EE90;">Live</span></p>
-            </div>
+<div class="status">
+    <h2>✅ Сервер работает!</h2>
+    <p>Время: {{ time }}</p>
+    <p>Статус: <span style="color: #90EE90;">Live</span></p>
+    <p>Модель: 🤖 Dolphin (без цензуры)</p>
+</div>
+
+<!-- ЧАТ БЛОК - добавляем сюда -->
+<div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 20px; margin: 20px 0;">
+    <h3>💬 Напиши сообщение:</h3>
+    <input type="text" id="messageInput" 
+           style="width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box;" 
+           placeholder="Введи сообщение...">
+    
+    <button onclick="sendMessage()" 
+            style="background: #ffd700; color: #333; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px;">
+        Отправить ➡️
+    </button>
+    
+    <div id="responseBox" style="margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; display: none;">
+        <strong>Ответ:</strong>
+        <pre id="responseText" style="margin: 10px 0 0 0; white-space: pre-wrap; word-wrap: break-word;"></pre>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const box = document.getElementById('responseBox');
+    const text = document.getElementById('responseText');
+    const message = input.value.trim();
+    
+    if (!message) {
+        alert('Введи сообщение!');
+        return;
+    }
+    
+    box.style.display = 'block';
+    text.textContent = 'Думаю... 🤔';
+    
+    try {
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        });
+        
+        const data = await response.json();
+        text.textContent = data.response || 'Нет ответа';
+    } catch (error) {
+        text.textContent = 'Ошибка: ' + error.message;
+    }
+}
+
+// Отправка по Enter
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+</script>
 
             <h2>📡 Доступные endpoints:</h2>
             <div class="endpoints">
@@ -264,3 +320,4 @@ def info():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
